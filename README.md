@@ -16,8 +16,8 @@ All the files you need for this assignment are found at https://github.com/kea-d
 **1. Securing a chat system**
 
 You’ll find under the folder /chat two Python scripts:
-- `chat_serv.py` implements the server of a chat system
-- `chat_client.py` implements the client of a chat system
+- `server.py` implements the server of a chat system
+- `client.py` implements the client of a chat system
 
 This chat allows one or more clients to communicate with each other using TCP sockets, thanks to a server whose job is to forward each message to all clients except to the one that sent the message. You’re welcome to run the server and a few instances of the client to see how it works. It should work fine on localhost, but it also works fine if several of you are running the instances within the same network.
 As it is right now, the chat is not secure. Design a simple security protocol for the chat system, incorporating encryption of the messages. Consider whether you would use either symmetric, asymmetric encryption, or both (and in which order), and describe the steps that each user would follow from the moment they join the chat until they’re able to send encrypted messages and what each user should do to decrypt and read the received messages. Try to keep it simple.
