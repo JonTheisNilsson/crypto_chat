@@ -54,7 +54,7 @@ parser.add_argument('ip', type=str, nargs='?', default='127.0.0.1',
                     help='the ip you want to bind. (default 127.0.0.1)')
 
 parser.add_argument('-p','--port', type=int, nargs='?', default=33000,
-                    help='the port. (default 3300)')  
+                    help='the port. (default 33000)')  
 parser.add_argument('-s','--buff-size', type=int, nargs='?', default=1024,
                     help='the size of the buffer. (default 1024)')
                     
