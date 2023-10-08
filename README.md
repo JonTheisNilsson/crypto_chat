@@ -8,7 +8,7 @@ This mandatory task will focus on using the Libsodium cryptographic library. Weâ
 You need to hand in a ZIP file with the files each question is asking for.
 
 ## Tools
-All the files you need for this assignment are found at https://github.com/kea-dk/crypto_chat.
+All the files you need for this assignment are found at https://github.com/Sebikea/crypto_chat.
 
 
 ## What youâ€™re asked to do
