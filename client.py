@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Script for Tkinter GUI chat client."""
 import argparse
+import random
 from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
 import tkinter
@@ -27,17 +28,7 @@ def receive():
             if len(msg) == 0:
                 break
 
-
-            #decrypted_msg = decrypt_msg(msg)
             decrypted_msg = BOX.decrypt(msg).decode()
-            #return decrypted.decode('utf-8')
-
-            # remove name and :
-            # try:
-            #     index = decrypted_msg.index(":")
-            #     decrypted_msg = decrypted_msg[index+1:]
-            # except:
-            #     pass
 
             msg_list.insert(tkinter.END, decrypted_msg)
             if decrypted_msg.startswith('Welcome') and title_chat == 'Chatter':
@@ -45,14 +36,17 @@ def receive():
                 top.title(title_chat)
         except OSError:  # Possibly client has left the chat.
             break
+        except:
+            print("something bad thread-stuff happened")
+            break
 
 
 def send(event=None):  # event is passed by binders.
     """Handles sending of messages."""
     msg = my_msg.get()
-
+    # print(msg)
     encrypted_msg = encrypt_msg(msg)
-    print(msg, encrypted_msg)
+    # print(msg, encrypted_msg)
     my_msg.set("")  # Clears input field.
     client_socket.send(encrypted_msg)
     if msg == "quit":
@@ -65,7 +59,10 @@ def on_closing(event=None):
     """This function is to be called when the window is closed."""
     my_msg.set("quit")
     print("closing")
-    send()
+    #send()
+    client_socket.shutdown(1)
+    top.quit()
+    quit()
 
 
 def encrypt_msg(msg: str) -> EncryptedMessage:
@@ -74,20 +71,30 @@ def encrypt_msg(msg: str) -> EncryptedMessage:
 
 
 def decrypt_msg(msg: EncryptedMessage) -> str:
-    print("encryptedmsg:", msg)
+    # print("encryptedmsg:", msg)
     decrypted = BOX.decrypt(msg.decode())
     return decrypted.decode('utf-8')
+
+
+def get_random_color():
+    de = ("%02x" % random.randint(0, 255))
+    re = ("%02x" % random.randint(0, 255))
+    we = ("%02x" % random.randint(0, 255))
+    ge = "#"
+    return ge + de + re + we
 
 
 top = tkinter.Tk()
 top.title(title_chat)
 
 messages_frame = tkinter.Frame(top)
+# messages_frame['background']='#856ff8'
 my_msg = tkinter.StringVar()  # For the messages to be sent.
 my_msg.set("Username?")
 scrollbar = tkinter.Scrollbar(messages_frame)  # To navigate through past messages.
 # Following will contain the messages.
 msg_list = tkinter.Listbox(messages_frame, height=15, width=50, yscrollcommand=scrollbar.set)
+msg_list.configure(background=get_random_color(), foreground="black")
 scrollbar.pack(side=tkinter.RIGHT, fill=tkinter.Y)
 msg_list.pack(side=tkinter.LEFT, fill=tkinter.BOTH)
 msg_list.pack()
@@ -120,7 +127,7 @@ ADDR = (HOST, PORT)
 CLIENT_PRIVATE_KEY = PrivateKey.generate()
 CLIENT_PUBLIC_KEY = CLIENT_PRIVATE_KEY.public_key
 SERVER_PUBLIC_KEY = None
-BOX: Box = None
+BOX: Box
 
 # ----Now comes the sockets part----
 client_socket = socket(AF_INET, SOCK_STREAM)

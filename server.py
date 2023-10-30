@@ -30,8 +30,13 @@ def handle_client(client: socket):  # Takes client socket as argument.
     """Handles a single client connection."""
     box = Box(SERVER_PRIVATE_KEY, public_keys[client])
 
-    name = box.decrypt(client.recv(BUFSIZ))
-    name = name.decode("utf8")
+    try:
+        name = (client.recv(BUFSIZ))
+        name = box.decrypt(name)
+        name = name.decode("utf8")
+    except:
+        print(f"{addresses[client][0]}:{addresses[client][1]} Error when decrypting username.")
+        name = "error"
 
     welcome = 'Welcome %s! If you ever want to quit, type {quit} to exit.' % name
 
@@ -42,19 +47,18 @@ def handle_client(client: socket):  # Takes client socket as argument.
 
     while True:
         msg = client.recv(BUFSIZ)
-        #decrypted_msg = decrypt_msg(msg, public_keys[client])
 
-        decrypted_msg = box.decrypt(msg)
-        decoded_msg = decrypted_msg.decode("utf8")
+        if len(msg) > 0:
+            decrypted_msg = box.decrypt(msg)
+            decoded_msg = decrypted_msg.decode("utf8")
+        else:
+            decoded_msg = "quit"
 
         if decoded_msg != "quit":
             broadcast(decoded_msg, name + ": ")
         else:
             disconnect_msg = f"{addresses[client][0]}:{addresses[client][1]} has disconnected."
-            remove_client_public_key(client)
-            #client.send(encrypt_msg("{quit}", client))
-            client.close()
-            del clients[client]
+            cleanup_client(client)
             broadcast(f"{name} has left the chat.")
             print(disconnect_msg)
             break
@@ -68,8 +72,10 @@ def broadcast(msg: str, prefix=""):  # prefix is for name identification.
         sock.send(encrypted_msg)
 
 
-def remove_client_public_key(_client: socket):
+def cleanup_client(_client: socket):
     del public_keys[_client]
+    _client.close()
+    del clients[_client]
 
 
 def encrypt_msg(msg: str, _client: socket) -> EncryptedMessage:
