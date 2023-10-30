@@ -21,11 +21,12 @@ def receive():
     BOX = Box(CLIENT_PRIVATE_KEY, SERVER_PUBLIC_KEY)
     print(SERVER_PUBLIC_KEY)
 
-
     while True:
         try:
             msg = client_socket.recv(BUFSIZ)
-            # print(f"msg received: {msg}")
+            if len(msg) == 0:
+                break
+
 
             #decrypted_msg = decrypt_msg(msg)
             decrypted_msg = BOX.decrypt(msg).decode()
@@ -51,17 +52,19 @@ def send(event=None):  # event is passed by binders.
     msg = my_msg.get()
 
     encrypted_msg = encrypt_msg(msg)
-    print(encrypted_msg)
+    print(msg, encrypted_msg)
     my_msg.set("")  # Clears input field.
     client_socket.send(encrypted_msg)
-    if msg == "{quit}":
-        client_socket.close()
+    if msg == "quit":
+        client_socket.shutdown(1)
         top.quit()
+        quit()
 
 
 def on_closing(event=None):
     """This function is to be called when the window is closed."""
-    my_msg.set("{quit}")
+    my_msg.set("quit")
+    print("closing")
     send()
 
 
@@ -71,6 +74,7 @@ def encrypt_msg(msg: str) -> EncryptedMessage:
 
 
 def decrypt_msg(msg: EncryptedMessage) -> str:
+    print("encryptedmsg:", msg)
     decrypted = BOX.decrypt(msg.decode())
     return decrypted.decode('utf-8')
 

@@ -20,7 +20,7 @@ def accept_incoming_connections():
         box = Box(SERVER_PRIVATE_KEY, public_keys[client])
         msg = b"Greetings from the cave! Now type your name and press enter!"
         encrypted = box.encrypt(msg)
-        # client.send(encrypted)
+        client.send(encrypted)
 
         addresses[client] = client_address
         Thread(target=handle_client, args=(client,)).start()
@@ -47,19 +47,21 @@ def handle_client(client: socket):  # Takes client socket as argument.
         decrypted_msg = box.decrypt(msg)
         decoded_msg = decrypted_msg.decode("utf8")
 
-        if decoded_msg != "{quit}":
+        if decoded_msg != "quit":
             broadcast(decoded_msg, name + ": ")
         else:
-            client.send(encrypt_msg("{quit}", client))
+            disconnect_msg = f"{addresses[client][0]}:{addresses[client][1]} has disconnected."
+            remove_client_public_key(client)
+            #client.send(encrypt_msg("{quit}", client))
             client.close()
             del clients[client]
-            # broadcast(bytes("%s has left the chat." % name, "utf8"))
+            broadcast(f"{name} has left the chat.")
+            print(disconnect_msg)
             break
 
 
 def broadcast(msg: str, prefix=""):  # prefix is for name identification.
     """Broadcasts a message to all the clients."""
-
     for sock in clients:
         res = prefix + msg
         encrypted_msg = encrypt_msg(res, sock)
